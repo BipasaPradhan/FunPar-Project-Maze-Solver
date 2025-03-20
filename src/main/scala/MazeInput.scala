@@ -1,12 +1,13 @@
 import scala.io.StdIn._
 
 object MazeInput {
-    // Represents a cell of the maze
+    //represents a cell of the maze
     case class Node(row: Int, col: Int)
 
-    // Directions for movement: left, right, down, up
+    //directions for movement: left, right, down, up
     val directions = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
+    //read maze from console
     def readMaze(): Array[Array[Int]] = {
         println("Start reading the maze")
         println("Enter the number of rows:")
