@@ -1,5 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: D:\FUNPAR\FunParProject\FunPar-Project-Maze-Solver\src\test\scala\MazeInputTest.scala:21:18 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m21 |[0m      assert(maze.deep == expected.deep)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m             ^^^^^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m             value deep is not a member of Array[Array[Int]][0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
