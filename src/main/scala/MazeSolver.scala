@@ -2,6 +2,11 @@ import scala.collection.mutable
 import MazeGraph._
 
 object MazeSolver {
+    /*
+    References: https://www.w3schools.com/dsa/dsa_algo_graphs_dijkstra.php
+    https://www.youtube.com/watch?v=x0-6QerfmGs
+    https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+    */
      
   //Dijkstra's Algorithm (Sequential Version)
   def dijkstra(graph: mutable.Map[Node, List[(Node, Int)]], start: Node, end: Node): (Int, List[Node]) = {
