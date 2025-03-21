@@ -4,7 +4,7 @@ import MazeGraph._
 object MazeSolver {
      
   //Dijkstra's Algorithm (Sequential Version)
-  def dijkstra(graph: Map[Node, List[(Node, Int)]], start: Node, end: Node): (Int, List[Node]) = {
+  def dijkstra(graph: mutable.Map[Node, List[(Node, Int)]], start: Node, end: Node): (Int, List[Node]) = {
     //stores shortest distance to each viable node
     val distances = mutable.Map[Node, Int]().withDefaultValue(Int.MaxValue)
     distances(start) = 0
@@ -12,7 +12,7 @@ object MazeSolver {
     //track the previous node (node before reaching current node)
     val previous = mutable.Map[Node, Node]()
 
-    val pq = mutable.PriorityQueue[(Node, Int)]()(Ordering.by(-_._2)) //min-heap
+    val pq = mutable.PriorityQueue[(Node, Int)]()(Ordering.by[(Node, Int), Int](_._2).reverse) //min-heap
     pq.enqueue((start, 0)) //start with the the start node
 
     while (pq.nonEmpty) {

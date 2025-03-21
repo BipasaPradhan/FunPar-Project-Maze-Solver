@@ -9,7 +9,7 @@ object MazeGraph {
     val directions = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
     //returns each node mapped to neighboring nodes it can move to 
-    def mazeToGraph(maze: Array[Array[Int]]): Map[Node, List[(Node, Int)]] = {
+    def mazeToGraph(maze: Array[Array[Int]]): mutable.Map[Node, List[(Node, Int)]] = {
 
         //map of walkable nodes with its walkable neighbors and their weights
         val graph = mutable.Map[Node, List[(Node, Int)]]().withDefaultValue(List())
@@ -31,6 +31,6 @@ object MazeGraph {
             }
             graph(node) = neighbors 
         }
-        graph.toMap
+        graph
     }
 }
