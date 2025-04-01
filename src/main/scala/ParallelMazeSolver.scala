@@ -42,17 +42,20 @@ object ParallelMazeSolver {
             } else {
               if (currNode == end) {
                 stopFlag.set(true)
+                return
               }
               // update neighbors
               for ((neighbor, weight) <- graph.getOrElse(currNode, List())) {
                 val newDis = currDis + weight
 
                 // if a shorter path is found
-                distances.compute(neighbor, (_, curr) => Math.min(curr, newDis))
+                distances.computeIfPresent(
+                  neighbor,
+                  (_, curr) => Math.min(curr, newDis)
+                )
                 if (distances(neighbor) == newDis) {
                   previous.put(neighbor, currNode)
-                  if (!pq.contains((neighbor, newDis)))
-                    pq.put((neighbor, newDis))
+                  pq.put((neighbor, newDis))
                 }
 
               }
@@ -68,8 +71,21 @@ object ParallelMazeSolver {
     executor.shutdown()
     executor.awaitTermination(
       Long.MaxValue,
-      java.util.concurrent.TimeUnit.NANOSECONDS
+      TimeUnit.NANOSECONDS
     )
 
+    // reconstruct the path from end to beginning & prepend
+    if (!previous.contains(end)) {
+      return (-1, List())
+    }
+    var path = List[Node]()
+    var node = end
+    while (previous.contains(node)) {
+      path = node :: path
+      node = previous(node)
+    }
+    path = start :: path
+
+    (distances(end), path)
   }
 }
