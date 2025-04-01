@@ -3,6 +3,7 @@ import MazeGraph._
 import MazeSolver._
 import scala.io.StdIn._
 import Timer._
+import ParallelMazeSolver._
 
 object Main extends App {
   // read maze from console (not file supported yet)
@@ -28,18 +29,34 @@ object Main extends App {
 
   val goal = Node(goalRow, goalCol)
 
-  // algorithm + time
-  val ((distance, path), elapsedTime) = measureTime {
+  // algorithm + time (sequential)
+  println("\nRunning Sequential Dijkstra...")
+  val ((seqDistance, seqPath), seqElapsedTime) = measureTime {
     dijkstra(graph, start, goal)
+  }
+  // algorithm + time (parallel)
+  println("\nRunning Parallel Dijkstra...")
+  val ((parDistance, parPath), parElapsedTime) = measureTime {
+    parallelDijkstra(graph, start, goal)
   }
 
   // results
-  if (distance == -1) {
+  println("\n=== Sequential Dijkstra ===")
+  if (seqDistance == -1) {
     println("No path found.")
   } else {
-    println(s"Shortest distance: $distance")
-    println(s"Path found: ${path.mkString(" -> ")}")
-    println(s"Execution time: ${elapsedTime} ms")
+    println(s"Shortest distance: $seqDistance")
+    println(s"Path found: ${seqPath.mkString(" -> ")}")
+    println(s"Execution time: ${seqElapsedTime} ms")
+  }
+
+  println("\n=== Parallel Dijkstra ===")
+  if (parDistance == -1) {
+    println("No path found.")
+  } else {
+    println(s"Shortest distance: $parDistance")
+    println(s"Path found: ${parPath.mkString(" -> ")}")
+    println(s"Execution time: ${parElapsedTime} ms")
   }
 
   println("\nMaze with Weights:")

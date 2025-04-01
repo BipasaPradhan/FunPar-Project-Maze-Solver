@@ -1,6 +1,8 @@
 import java.util.concurrent._
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
+import MazeGraph._
 
 object ParallelMazeSolver {
   def parallelDijkstra(
@@ -10,11 +12,11 @@ object ParallelMazeSolver {
   ): (Int, List[Node]) = {
     // stores shortest distance to each viable node
     val distances =
-      new ConcurrentHashMap[Node, Int]().asScala.withDefaultValue(Int.MaxValue)
+      new ConcurrentHashMap[Node, Int]()
     distances.put(start, 0)
 
     // track the previous node (node before reaching current node)
-    val previous = new ConcurrentHashMap[Node, Node]().asScala
+    val previous = new ConcurrentHashMap[Node, Node]()
 
     val pq = new PriorityBlockingQueue[(Node, Int)](
       100,
@@ -37,7 +39,7 @@ object ParallelMazeSolver {
             if (entry == null) return
             val (currNode, currDis) = entry
             // skip nodes for which shorter path is found
-            if (currDis > distances(currNode)) {
+            if (currDis > distances.getOrDefault(currNode, Int.MaxValue)) {
               // continue
             } else {
               if (currNode == end) {
@@ -47,13 +49,21 @@ object ParallelMazeSolver {
               // update neighbors
               for ((neighbor, weight) <- graph.getOrElse(currNode, List())) {
                 val newDis = currDis + weight
+                var updated = false
 
                 // if a shorter path is found
-                distances.computeIfPresent(
+                distances.compute(
                   neighbor,
-                  (_, curr) => Math.min(curr, newDis)
+                  (_, curr) => {
+                    val currDistance = Option(curr).getOrElse(Int.MaxValue)
+                    if (newDis < currDistance) {
+                      updated = true
+                      newDis
+                    } else currDistance
+                  }
                 )
-                if (distances(neighbor) == newDis) {
+
+                if (updated) {
                   previous.put(neighbor, currNode)
                   pq.put((neighbor, newDis))
                 }
@@ -65,9 +75,7 @@ object ParallelMazeSolver {
       }
     }
 
-    workers.foreach { worker =>
-      executor.execute(worker)
-    }
+    workers.foreach(executor.execute)
     executor.shutdown()
     executor.awaitTermination(
       Long.MaxValue,
@@ -75,17 +83,17 @@ object ParallelMazeSolver {
     )
 
     // reconstruct the path from end to beginning & prepend
-    if (!previous.contains(end)) {
+    if (!previous.containsKey(end)) {
       return (-1, List())
     }
     var path = List[Node]()
     var node = end
     while (previous.contains(node)) {
       path = node :: path
-      node = previous(node)
+      node = previous.get(node)
     }
     path = start :: path
 
-    (distances(end), path)
+    (distances.getOrDefault(end, -1), path)
   }
 }
