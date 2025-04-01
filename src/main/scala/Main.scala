@@ -39,7 +39,7 @@ object Main extends App {
   } else {
     println(s"Shortest distance: $distance")
     println(s"Path found: ${path.mkString(" -> ")}")
-    println(s"Execution time: ${elapsedTime}ms")
+    println(s"Execution time: ${elapsedTime} ms")
   }
 
   println("\nMaze with Weights:")
