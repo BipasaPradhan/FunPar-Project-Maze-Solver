@@ -1,9 +1,4 @@
-import java.util.concurrent.{
-  ConcurrentHashMap,
-  Executors,
-  PriorityBlockingQueue,
-  AtomicBoolean
-}
+import java.util.concurrent._
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 
@@ -35,23 +30,46 @@ object ParallelMazeSolver {
     val stopFlag = new AtomicBoolean(false)
 
     val workers = (1 to numThreads).map { _ =>
-      executor.submit(new Runnable {
+      new Runnable {
         override def run(): Unit = {
-          while (!stopFlag.get() && !pq.isEmpty) {
-            val (currNode, currDis) = pq.poll()
-
-            // skip nodes for which a shorter path is already found
+          while (!stopFlag.get()) {
+            val entry = pq.poll()
+            if (entry == null) return
+            val (currNode, currDis) = entry
+            // skip nodes for which shorter path is found
             if (currDis > distances(currNode)) {
+              // continue
             } else {
-              // Reached the end -> reconstruct the path from end to beginning & prepend
               if (currNode == end) {
-                var path = List[Node]()
-                var node = end
+                stopFlag.set(true)
+              }
+              // update neighbors
+              for ((neighbor, weight) <- graph.getOrElse(currNode, List())) {
+                val newDis = currDis + weight
+
+                // if a shorter path is found
+                distances.compute(neighbor, (_, curr) => Math.min(curr, newDis))
+                if (distances(neighbor) == newDis) {
+                  previous.put(neighbor, currNode)
+                  if (!pq.contains((neighbor, newDis)))
+                    pq.put((neighbor, newDis))
+                }
+
               }
             }
+          }
         }
-      })
+      }
     }
+
+    workers.foreach { worker =>
+      executor.execute(worker)
+    }
+    executor.shutdown()
+    executor.awaitTermination(
+      Long.MaxValue,
+      java.util.concurrent.TimeUnit.NANOSECONDS
+    )
 
   }
 }
