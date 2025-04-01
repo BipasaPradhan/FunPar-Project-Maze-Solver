@@ -2,6 +2,7 @@ import MazeInput._
 import MazeGraph._
 import MazeSolver._
 import scala.io.StdIn._
+import Timer._
 
 object Main extends App {
   // read maze from console (not file supported yet)
@@ -27,8 +28,10 @@ object Main extends App {
 
   val goal = Node(goalRow, goalCol)
 
-  // algorithm
-  val (distance, path) = dijkstra(graph, start, goal)
+  // algorithm + time
+  val ((distance, path), elapsedTime) = measureTime {
+    dijkstra(graph, start, goal)
+  }
 
   // results
   if (distance == -1) {
@@ -36,6 +39,7 @@ object Main extends App {
   } else {
     println(s"Shortest distance: $distance")
     println(s"Path found: ${path.mkString(" -> ")}")
+    println(s"Execution time: ${elapsedTime}ms")
   }
 
   println("\nMaze with Weights:")
