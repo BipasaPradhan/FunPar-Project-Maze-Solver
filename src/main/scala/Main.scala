@@ -35,14 +35,30 @@ object Main extends App {
     bfs(graph, start, goal)
   }
 
+  // algorithm + time (parallel)
+  println("\nRunning Parallel BFS...")
+  val ((parDistance, parPath), parElapsedTime) = measureTime {
+    parallelBFS(graph, start, goal)
+  }
+
   // results
   println("\n=== Sequential BFS ===")
   if (seqDistance == -1) {
     println("No path found.")
   } else {
-    println(s"Shortest distance: $seqDistance")
+    println(s"Steps: $seqDistance")
     println(s"Path found: ${seqPath.mkString(" -> ")}")
     println(s"Execution time: ${seqElapsedTime} ms")
+  }
+
+  println("\n=== Parallel BFS ===")
+
+  if (parDistance == -1) {
+    println("No path found.")
+  } else {
+    println(s"Steps: $parDistance")
+    println(s"Path found: ${parPath.mkString(" -> ")}")
+    println(s"Execution time: ${parElapsedTime} ms")
   }
 
   println("\nMaze Representation:")

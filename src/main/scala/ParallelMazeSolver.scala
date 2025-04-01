@@ -1,11 +1,17 @@
 import java.util.concurrent._
 import scala.collection.mutable
 import MazeGraph._
-import ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits.global
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.Duration
+import scala.collection.mutable
 
 object ParallelMazeSolver {
   def parallelBFS(
-      graph: mutable.Map[Node, List[Node]],
+      graph: mutable.Map[Node, List[(Node, Int)]],
       start: Node,
       end: Node
   ): (Int, List[Node]) = {
@@ -21,39 +27,36 @@ object ParallelMazeSolver {
     queue.add(start) // start with the start node
 
     // track visited
-    val visited = new ConcurrentHashMap[Node, Boolean]()
+    val visited = new ConcurrentHashMap[Node, java.lang.Boolean]()
     visited.put(start, true)
 
     // flag to stop when node is found
     val stopFlag = new AtomicBoolean(false)
 
-    val tasks =
-      for (_ <- 0 until Runtime.getRuntime.availableProcessors()) yield {
-        Future {
-          while (!queue.isEmpty && !stopFlag.get()) {
-            val currentNode = queue.poll()
-            if (currentNode == null) return
-
-            // explore neighbors
-            for (neighbor <- graph.getOrElse(currentNode, List())) {
-              if (visited.putIfAbsent(neighbor, true) == null) {
-                distances.putIfAbsent(
-                  neighbor,
-                  distances.get(currentNode) + 1
-                )
+    val tasks = (0 until Runtime.getRuntime.availableProcessors()).map { _ =>
+      Future {
+        var continue = true
+        while (continue && !stopFlag.get()) {
+          val currentNode = queue.poll()
+          if (currentNode == null) {
+            continue = false
+          } else {
+            graph.getOrElse(currentNode, List()).foreach { case (neighbor, _) =>
+              if (
+                visited.putIfAbsent(neighbor, java.lang.Boolean.TRUE) == null
+              ) {
+                distances.put(neighbor, distances.get(currentNode) + 1)
                 previous.put(neighbor, currentNode)
                 queue.add(neighbor)
-
-                // end -> stop search
                 if (neighbor == end) {
                   stopFlag.set(true)
-                  return
                 }
               }
             }
           }
         }
       }
+    }
     Await.result(Future.sequence(tasks), Duration.Inf)
 
     // reconstruct the path
