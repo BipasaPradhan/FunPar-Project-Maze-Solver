@@ -5,7 +5,7 @@ object MazeInput {
   def readMaze(): Array[Array[Int]] = {
     println("Terrain Types:")
     println(
-      "1 = Normal (cost 1), 2 = Mud (cost 3), 3 = Water (cost 5), 0 = Wall (not walkable)"
+      "1 = walkable, 0 = Wall (not walkable)"
     )
     println("Enter the number of rows:")
     val rows = readInt()

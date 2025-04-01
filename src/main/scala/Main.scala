@@ -30,18 +30,13 @@ object Main extends App {
   val goal = Node(goalRow, goalCol)
 
   // algorithm + time (sequential)
-  println("\nRunning Sequential Dijkstra...")
+  println("\nRunning Sequential BFS...")
   val ((seqDistance, seqPath), seqElapsedTime) = measureTime {
-    dijkstra(graph, start, goal)
-  }
-  // algorithm + time (parallel)
-  println("\nRunning Parallel Dijkstra...")
-  val ((parDistance, parPath), parElapsedTime) = measureTime {
-    parallelDijkstra(graph, start, goal)
+    bfs(graph, start, goal)
   }
 
   // results
-  println("\n=== Sequential Dijkstra ===")
+  println("\n=== Sequential BFS ===")
   if (seqDistance == -1) {
     println("No path found.")
   } else {
@@ -50,27 +45,9 @@ object Main extends App {
     println(s"Execution time: ${seqElapsedTime} ms")
   }
 
-  println("\n=== Parallel Dijkstra ===")
-  if (parDistance == -1) {
-    println("No path found.")
-  } else {
-    println(s"Shortest distance: $parDistance")
-    println(s"Path found: ${parPath.mkString(" -> ")}")
-    println(s"Execution time: ${parElapsedTime} ms")
-  }
-
-  println("\nMaze with Weights:")
+  println("\nMaze Representation:")
   for (row <- maze.indices) {
-    for (col <- maze(row).indices) {
-      val value = maze(row)(col) match {
-        case 1 => "1 " // normal
-        case 2 => "2 " // mud
-        case 3 => "3 " // water
-        case 0 => "X " // wall
-      }
-      print(value)
-    }
-    println()
+    println(maze(row).mkString(" "))
   }
 
 }

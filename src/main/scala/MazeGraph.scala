@@ -8,14 +8,6 @@ object MazeGraph {
   // directions for movement: up, down, left, right
   val directions = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
-  // cost of each terrain type
-  val terrainCosts: Map[Int, Int] = Map(
-    1 -> 1, // normal ground
-    2 -> 3, // mud
-    3 -> 5, // water
-    0 -> Int.MaxValue // wall
-  )
-
   // returns each node mapped to neighboring nodes it can move to
   def mazeToGraph(
       maze: Array[Array[Int]]
@@ -37,8 +29,7 @@ object MazeGraph {
             0
           ).length && maze(newRow)(newCol) != 0
         ) {
-          val neighborCost = terrainCosts(maze(newRow)(newCol))
-          Some(Node(newRow, newCol) -> neighborCost)
+          Some(Node(newRow, newCol) -> 1)
         } else {
           None
         }
