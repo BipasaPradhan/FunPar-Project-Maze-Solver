@@ -60,6 +60,19 @@ object MazeSolver {
     def heuristic(node: Node, goal: Node): Int = {
       Math.abs(node.row - goal.row) + Math.abs(node.col - goal.col)
     }
+
+    val pq = mutable.PriorityQueue[(Node, Int)]()(
+      Ordering.by(_._2).reverse
+    ) // min-heap
+    pq.enqueue((start, 0))
+
+    // shortest distance to each viable node
+    val gScore = mutable.Map[Node, Int]().withDefaultValue(Int.MaxValue)
+    gScore(start) = 0
+
+    // total cost (gscore + heuristic)
+    val tScore = mutable.Map[Node, Int]().withDefaultValue(Int.MaxValue)
+    tScore(start) = heuristic(start, end)
   }
 
 }
