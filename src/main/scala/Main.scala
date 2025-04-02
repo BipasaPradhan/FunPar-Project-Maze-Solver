@@ -6,39 +6,88 @@ import Timer._
 import ParallelMazeSolver._
 
 object Main extends App {
-  val size = 5
-  val trials = 10
-  val maze =
-    Array.fill(size, size)(1) // Generate a 5x5 maze of all 1's (open spaces)
-  val graph = mazeToGraph(maze) // Convert to adjacency list
-  val start = Node(0, 0) // Start node (top-left)
-  val goal = Node(size - 1, size - 1) // Goal node (bottom-right)
+  // Function to print the maze in a visual format
+  def printMaze(maze: Array[Array[Int]], path: List[Node] = List()): Unit = {
+    for (row <- maze.indices) {
+      for (col <- maze(row).indices) {
+        val node = Node(row, col)
+        if (path.contains(node)) {
+          print("P ") // Path representation
+        } else if (maze(row)(col) == 0) {
+          print("X ") // Wall representation
+        } else {
+          print("1 ") // Walkable cell
+        }
+      }
+      println()
+    }
+  }
 
-  // Sequential BFS
-  println("\nRunning Sequential BFS...")
-  val ((seqDistance, _), seqElapsedTime) =
-    measureTime(bfs(graph, start, goal), trials)
+  // Read the maze from input
+  val maze = MazeInput.readMaze()
 
-  // Parallel BFS
-  println("\nRunning Parallel BFS...")
-  val ((parDistance, _), parElapsedTime) =
-    measureTime(parallelBFS(graph, start, goal), trials)
+  // Convert to adjacency list (graph)
+  val graph = mazeToGraph(maze)
 
-  // Sequential A*
-  println("\nRunning Sequential A*...")
-  val ((seqDistanceA, _), seqElapsedTimeA) =
-    measureTime(aStar(graph, start, goal), trials)
+  // Get start and goal from the user
+  println("Enter start row:")
+  val startRow = readInt()
 
-  // Print results
-  println("\n=== Sequential BFS ===")
-  println(s"Steps: $seqDistance")
-  println(f"Avg Execution time: $seqElapsedTime%.2f ms")
+  println("Enter start column:")
+  val startCol = readInt()
 
-  println("\n=== Parallel BFS ===")
-  println(s"Steps: $parDistance")
-  println(f"Avg Execution time: $parElapsedTime%.2f ms")
+  val start = Node(startRow, startCol)
 
-  println("\n=== Sequential A* ===")
-  println(s"Steps: $seqDistanceA")
-  println(f"Avg Execution time: $seqElapsedTimeA%.2f ms")
+  println("Enter goal row:")
+  val goalRow = readInt()
+
+  println("Enter goal column:")
+  val goalCol = readInt()
+
+  val goal = Node(goalRow, goalCol)
+
+  // Print the original maze
+  println("\nOriginal Maze:")
+  printMaze(maze)
+
+  // Algorithm selection prompt
+  println(
+    "\nSelect the algorithms to run (separate multiple choices with commas):"
+  )
+  println("1. Sequential BFS")
+  println("2. Parallel BFS")
+  println("3. Sequential A*")
+
+  // Get user input for multiple algorithm choices
+  val choices = readLine().split(",").map(_.trim).map(_.toInt).toList
+
+  // List of algorithms with names and function references
+  val algorithms = List(
+    ("1", "Sequential BFS", () => bfs(graph, start, goal)),
+    ("2", "Parallel BFS", () => parallelBFS(graph, start, goal)),
+    ("3", "Sequential A*", () => aStar(graph, start, goal))
+  )
+
+  // Run the selected algorithms
+  choices.foreach { choice =>
+    algorithms.find(_._1 == choice.toString) match {
+      case Some((_, algorithmName, algorithm)) =>
+        println(s"\nRunning $algorithmName...")
+        val (distance, path) = algorithm() // Run the selected algorithm
+
+        println(s"\n=== $algorithmName ===")
+        if (distance == -1) {
+          println("No path found.")
+        } else {
+          println(s"Steps: $distance")
+          println("Path found:")
+          printMaze(maze, path) // Print the maze with the path
+          println(
+            s"Path taken: ${path.map(n => s"(${n.row},${n.col})").mkString(" -> ")}"
+          ) // Print nodes in sequence
+        }
+
+      case None => println("Invalid choice. Please select a valid algorithm.")
+    }
+  }
 }
