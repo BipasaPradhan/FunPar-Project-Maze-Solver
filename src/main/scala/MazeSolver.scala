@@ -49,4 +49,17 @@ object MazeSolver {
     (-1, List())
   }
 
+  // sequential A* algorithm
+  def aStar(
+      graph: mutable.Map[Node, List[(Node, Int)]],
+      start: Node,
+      end: Node
+  ): (Int, List[Node]) = {
+
+    // Manhattan distance heuristic
+    def heuristic(node: Node, goal: Node): Int = {
+      Math.abs(node.row - goal.row) + Math.abs(node.col - goal.col)
+    }
+  }
+
 }
