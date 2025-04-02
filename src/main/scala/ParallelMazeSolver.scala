@@ -75,4 +75,50 @@ object ParallelMazeSolver {
     (distances.getOrDefault(end, -1), path)
 
   }
+
+  def parallelAStar(
+      graph: mutable.Map[Node, List[(Node, Int)]],
+      start: Node,
+      end: Node
+  ): (Int, List[Node]) = {
+    // Manhattan distance heuristic
+    def heuristic(node: Node, goal: Node): Int = {
+      math.abs(node.row - goal.row) + math.abs(node.col - goal.col)
+    }
+
+    val pq = mutable.PriorityQueue[(Node, Int)]()(
+      Ordering.by[(Node, Int), Int](_._2).reverse
+    )
+    pq.enqueue((start, 0))
+
+    val executor = Executors.newFixedThreadPool(numThreads)
+
+    val gScore = new ConcurrentHashMap[Node, Int]()
+    gScore.put(start, 0)
+
+    val tScore = new ConcurrentHashMap[Node, Int]()
+    tScore.put(start, heuristic(start, end))
+
+    val previous = new ConcurrentHashMap[Node, Node]()
+
+    // process nodes
+    while (pq.nonEmpty) {
+      val (current, _) = pq.dequeue()
+
+      // reached the end -> reconstruct from end to beginning & prepend
+      if (current == end) {
+        var path = List[Node]()
+        var node = end
+
+        while (previous.containsKey(node)) {
+          path = node :: path
+          node = previous.get(node)
+        }
+        path = start :: path // prepend start node to path
+        return (gScore.get(end), path) // return distance and path
+      }
+
+      
+  }
+
 }
