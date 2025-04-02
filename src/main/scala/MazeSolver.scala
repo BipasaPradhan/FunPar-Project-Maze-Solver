@@ -62,7 +62,7 @@ object MazeSolver {
     }
 
     val pq = mutable.PriorityQueue[(Node, Int)]()(
-      Ordering.by(_._2).reverse
+      Ordering.by[(Node, Int), Int](_._2).reverse
     ) // min-heap
     pq.enqueue((start, 0))
 
@@ -73,6 +73,27 @@ object MazeSolver {
     // total cost (gscore + heuristic)
     val tScore = mutable.Map[Node, Int]().withDefaultValue(Int.MaxValue)
     tScore(start) = heuristic(start, end)
+
+    // previous node for path reconstruction
+    val previous = mutable.Map[Node, Node]()
+
+    while (pq.nonEmpty) {
+      val (current, _) = pq.dequeue()
+
+      // reached the end -> reconstruct from end to beginning & prepend
+      if (current == end) {
+        var path = List[Node]()
+        var node = end
+
+        while (previous.contains(node)) {
+          path = node :: path
+          node = previous(node)
+        }
+        path = start :: path // prepend start node to path
+        return (gScore(end), path) // return shortest cost and path
+      }
+
+      
   }
 
 }
