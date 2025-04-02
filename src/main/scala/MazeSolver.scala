@@ -93,7 +93,21 @@ object MazeSolver {
         return (gScore(end), path) // return shortest cost and path
       }
 
-      
+      // explore neighbors
+      for ((neighbor, cost) <- graph.getOrElse(current, List())) {
+        val tentativeGScore = gScore(current) + cost
+
+        if (tentativeGScore < gScore(neighbor)) { // better path
+          previous(neighbor) = current
+          gScore(neighbor) = tentativeGScore
+          tScore(neighbor) = tentativeGScore + heuristic(neighbor, end)
+
+          pq.enqueue((neighbor, tScore(neighbor)))
+        }
+      }
+    }
+    // no path found
+    (-1, List())
   }
 
 }
